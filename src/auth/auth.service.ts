@@ -16,7 +16,7 @@ export class AuthService {
   ) {}
 
   async signUp(dto: AuthDto) {
-    const { email, password } = dto;
+    const { email, password, name, address, phoneNumber } = dto;
     const foundUser = await this.prisma.user.findUnique({ where: { email } });
     if (foundUser) {
       throw new BadRequestException('email already exists');
@@ -27,6 +27,9 @@ export class AuthService {
       data: {
         email,
         password: hashedPassword,
+        name: name,
+        address: address,
+        phoneNumber: phoneNumber,
       },
     });
     return { message: 'SignUp Successfull' };
