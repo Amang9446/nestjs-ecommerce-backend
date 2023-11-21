@@ -1,10 +1,12 @@
 import {
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { PrismaService } from 'prisma/prisma.service';
+import { UpdateUserDto } from './dto/update.dto';
 
 @Injectable()
 export class UsersService {
@@ -18,7 +20,7 @@ export class UsersService {
       throw new NotFoundException();
     }
     const decodedUser = req.user as { id: string; email: string };
-    if (user.id! == decodedUser.id) {
+    if (user.id !== decodedUser.id) {
       throw new ForbiddenException();
     }
     delete user.password;
@@ -29,5 +31,28 @@ export class UsersService {
     return await this.prisma.user.findMany({
       select: { id: true, email: true },
     });
+  }
+
+  async editUser(id: string, updateUserDto: UpdateUserDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+    });
+    if (!user) {
+      throw new NotFoundException();
+    }
+    if (updateUserDto.email && user.email !== updateUserDto.email) {
+      const existingUser = await this.prisma.user.findUnique({
+        where: { email: updateUserDto.email },
+      });
+      if (existingUser) {
+        throw new ConflictException('Email is already in use');
+      }
+    }
+    const updatedUser = await this.prisma.user.update({
+      where: { id },
+      data: updateUserDto,
+    });
+
+    return { message: 'Updated Successfully' };
   }
 }

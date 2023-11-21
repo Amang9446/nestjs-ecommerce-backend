@@ -8,6 +8,7 @@ import { PrismaService } from 'prisma/prisma.service';
 import { comparePassword, hashPassword, signToken } from 'src/helper/helper';
 import { JwtService } from '@nestjs/jwt';
 import { Request, Response } from 'express';
+import { loginDto } from './dto/login.dto';
 @Injectable()
 export class AuthService {
   constructor(
@@ -17,7 +18,6 @@ export class AuthService {
 
   async signUp(dto: AuthDto) {
     const { email, password, name, address, phoneNumber, selectedRole } = dto;
-    // console.log(dto);
 
     if (selectedRole !== '1' && selectedRole !== '2') {
       throw new BadRequestException(
@@ -30,7 +30,6 @@ export class AuthService {
         role: +selectedRole,
       },
     });
-    // console.log('role is  ', findRole);
     const foundUser = await this.prisma.user.findUnique({ where: { email } });
     if (foundUser) {
       throw new BadRequestException('email already exists');
@@ -50,7 +49,7 @@ export class AuthService {
     return { message: 'SignUp Successfull' };
   }
 
-  async signIn(dto: AuthDto, req: Request, res: Response) {
+  async signIn(dto: loginDto, req: Request, res: Response) {
     const { email, password } = dto;
     const validateEmail = await this.prisma.user.findUnique({
       where: { email },
