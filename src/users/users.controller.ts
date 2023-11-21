@@ -6,7 +6,6 @@ import {
   Req,
   Patch,
   Body,
-  NotFoundException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
@@ -34,17 +33,6 @@ export class UsersController {
     @Param('id') id: string,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
-    try {
-      const successMessage = await this.usersService.updatePassword(
-        id,
-        updatePasswordDto,
-      );
-      return { message: successMessage };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        return { message: 'User not found' };
-      }
-      throw error;
-    }
+    return this.usersService.updatePassword(id, updatePasswordDto);
   }
 }

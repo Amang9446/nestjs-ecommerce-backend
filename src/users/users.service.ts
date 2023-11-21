@@ -87,6 +87,6 @@ export class UsersService {
       },
     });
 
-    return 'Password Updated Successfully';
+    return { message: 'Password Updated Successfully ' };
   }
 }
