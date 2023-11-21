@@ -16,15 +16,15 @@ model User {
   name        String   @default("")
   password    String
   address     String   @default("")
-  phoneNumber Int      @default(0)
+  phoneNumber BigInt      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt()
-  roleId      String   @default("1")
-  role        Role?    @relation(fields: [roleId], references: [id], name: "UserRole")
+  roleId      String
+  role        Role     @relation(fields: [roleId], references: [id])
 }
 
 model Role {
-  id    String @unique @default(uuid())
+  id    String   @unique @default(uuid()) @id
   role  Int
-  users User[] @relation("UserRole")
+  users User[]
 }
