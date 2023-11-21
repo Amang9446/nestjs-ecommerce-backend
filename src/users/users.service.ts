@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -7,6 +8,8 @@ import {
 import { Request } from 'express';
 import { PrismaService } from 'prisma/prisma.service';
 import { UpdateUserDto } from './dto/update.dto';
+import * as bcrypt from 'bcrypt';
+import { UpdatePasswordDto } from './dto/password.dto';
 
 @Injectable()
 export class UsersService {
@@ -48,11 +51,42 @@ export class UsersService {
         throw new ConflictException('Email is already in use');
       }
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const updatedUser = await this.prisma.user.update({
       where: { id },
       data: updateUserDto,
     });
 
     return { message: 'Updated Successfully' };
+  }
+  async updatePassword(id: string, updatePasswordDto: UpdatePasswordDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new NotFoundException();
+    }
+    const isOldPasswordValid = await bcrypt.compare(
+      updatePasswordDto.oldpassword,
+      user.password,
+    );
+
+    if (!isOldPasswordValid) {
+      throw new BadRequestException('Old password is incorrect');
+    }
+    const hashedNewPassword = await bcrypt.hash(
+      updatePasswordDto.newpassword,
+      10,
+    );
+
+    await this.prisma.user.update({
+      where: { id },
+      data: {
+        password: hashedNewPassword,
+      },
+    });
+
+    return 'Password Updated Successfully';
   }
 }
