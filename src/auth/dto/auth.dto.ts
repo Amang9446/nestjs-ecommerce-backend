@@ -27,5 +27,9 @@ export class AuthDto {
 
   @IsNumber()
   @IsNotEmpty()
-  public number: number;
+  public phoneNumber: number;
+
+  @IsNotEmpty()
+  @IsString()
+  public selectedRole: string;
 }

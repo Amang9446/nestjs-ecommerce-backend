@@ -18,4 +18,5 @@ export class AuthController {
   signOut(@Req() req, @Res() res) {
     return this.authService.signOut(req, res);
   }
+  
 }

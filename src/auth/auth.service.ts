@@ -16,7 +16,21 @@ export class AuthService {
   ) {}
 
   async signUp(dto: AuthDto) {
-    const { email, password, name, address, phoneNumber } = dto;
+    const { email, password, name, address, phoneNumber, selectedRole } = dto;
+    // console.log(dto);
+
+    if (selectedRole !== '1' && selectedRole !== '2') {
+      throw new BadRequestException(
+        'Invalid role. Allowed roles are: 1 for user, 2 for seller',
+      );
+    }
+
+    const findRole = await this.prisma.role.findFirst({
+      where: {
+        role: +selectedRole,
+      },
+    });
+    // console.log('role is  ', findRole);
     const foundUser = await this.prisma.user.findUnique({ where: { email } });
     if (foundUser) {
       throw new BadRequestException('email already exists');
@@ -27,9 +41,10 @@ export class AuthService {
       data: {
         email,
         password: hashedPassword,
-        name: name,
-        address: address,
-        phoneNumber: phoneNumber,
+        name,
+        address,
+        phoneNumber,
+        roleId: findRole.id,
       },
     });
     return { message: 'SignUp Successfull' };
